@@ -164,10 +164,36 @@ def analyze_pending_guess(pending_guess, history):
             "remaining_count": remaining_count
         }
     else:
+        # Find the first clue in history that this combination contradicts
+        contradicting_clue_index = None
+        contradiction_detail = None
+        for idx, entry in enumerate(history):
+            past_guess = entry["guess"]
+            past_a = entry["a"]
+            past_b = entry["b"]
+            calc_a, calc_b = calculate_ab(pending_guess, past_guess)
+            if (calc_a, calc_b) != (past_a, past_b):
+                contradicting_clue_index = idx + 1
+                contradiction_detail = {
+                    "past_guess": past_guess,
+                    "past_a": past_a,
+                    "past_b": past_b,
+                    "calc_a": calc_a,
+                    "calc_b": calc_b
+                }
+                break
+                
         reason = (
-            f"💡 聰明的探索！雖然這個數字本身不可能是答案，但它沒有使用已被排除的數字，"
-            f"非常適合用來探測和排除其他數字的分布喔！目前符合所有線索的答案剩餘 {remaining_count} 種組合。"
+            f"💡 聰明的探索！雖然這 4 個數字的機率都不為 0，但 '{pending_guess}' 這個特定排列組合不可能是答案喔。\n"
         )
+        if contradicting_clue_index is not None:
+            detail = contradiction_detail
+            reason += (
+                f"**原因**：因為第 {contradicting_clue_index} 次猜測的 '{detail['past_guess']}' 提示為 {detail['past_a']}A{detail['past_b']}B。\n"
+                f"但若答案為 '{pending_guess}'，則 '{detail['past_guess']}' 應該會是 {detail['calc_a']}A{detail['calc_b']}B，這與線索衝突。\n"
+            )
+        reason += f"不過這依然是一個非常好的探索性猜測，可以用來探測數字的分佈喔！目前符合所有線索的答案剩餘 {remaining_count} 種組合。"
+        
         return {
             "status": "exploratory",
             "reason": reason,

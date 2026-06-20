@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🕵️‍♂️ 1A2B 邏輯小偵探訓練營 🕵️‍♀️</title>
-    <!-- Google Fonts: Fredoka & Noto Sans TC for a friendly, readable look -->
+    <!-- Google Fonts: Fredoka & Noto Sans TC -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
@@ -24,7 +24,7 @@
             --card-bg: rgba(255, 255, 255, 0.85);
             --text-main: #2d3436;
             --text-muted: #636e72;
-            --border-radius: 20px;
+            --border-radius: 25px;
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
@@ -70,17 +70,124 @@
             font-weight: 500;
         }
 
-        .container {
+        /* Screen Wrapper */
+        .screen {
+            display: none;
             width: 100%;
             max-width: 1000px;
+            animation: fadeIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+
+        .screen.active {
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
+        }
+
+        #selection-screen.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mode Selection Styles */
+        .mode-container {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 800px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 650px) {
+            .mode-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .mode-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 40px 25px;
+            flex: 1;
+            max-width: 350px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(108, 92, 231, 0.15);
+            border-color: var(--primary-light);
+        }
+
+        .mode-icon {
+            font-size: 4.5rem;
+            animation: float 3s infinite ease-in-out;
+            user-select: none;
+        }
+
+        .mode-card.mode-3 .mode-icon {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .mode-card h3 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .mode-badge {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+
+        .mode-card.mode-3 .mode-badge {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .mode-card.mode-4 .mode-badge {
+            background: var(--info-bg);
+            color: var(--info);
+        }
+
+        .mode-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Game Layout Screen */
+        #game-screen {
+            grid-template-columns: 1.2fr 1.0fr;
             gap: 25px;
-            margin-bottom: 30px;
         }
 
         @media (max-width: 850px) {
-            .container {
+            #game-screen {
                 grid-template-columns: 1fr;
             }
         }
@@ -121,14 +228,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            gap: 15px;
+            gap: 10px;
         }
 
         .btn {
             font-family: inherit;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 700;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
             border-radius: 50px;
             cursor: pointer;
@@ -136,8 +243,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
         }
 
         .btn-primary {
@@ -211,7 +318,7 @@
             border-color: var(--primary-light);
         }
 
-        /* Hidden standard input for mobile compatibility and accessibility */
+        /* Hidden standard input */
         #hidden-input {
             position: absolute;
             opacity: 0;
@@ -392,7 +499,6 @@
             background: #ffe5e5;
             border-color: #ff7675;
             color: #d63031;
-            text-decoration: line-through;
         }
 
         .digit-badge.eliminated::after {
@@ -419,10 +525,10 @@
         }
 
         .digit-badge-label {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
-            margin-top: -2px;
-            font-weight: 600;
+            margin-top: 1px;
+            font-weight: 700;
         }
 
         .digit-badge.eliminated .digit-badge-label {
@@ -442,6 +548,7 @@
             padding: 12px;
             border-radius: 12px;
             border: 1px dashed #d1d8e0;
+            gap: 10px;
         }
 
         .lock-slot {
@@ -488,7 +595,6 @@
             padding-right: 5px;
         }
 
-        /* Custom Scrollbar */
         .history-list::-webkit-scrollbar {
             width: 6px;
         }
@@ -568,7 +674,7 @@
             box-shadow: 0 3px 8px rgba(9, 132, 227, 0.2);
         }
 
-        /* Success/Win Overlay */
+        /* Success Overlay */
         .win-overlay {
             position: fixed;
             top: 0;
@@ -633,7 +739,7 @@
             font-size: 1.3rem;
         }
 
-        /* Audio Control Button */
+        /* Audio Toggle */
         .audio-toggle {
             position: fixed;
             bottom: 20px;
@@ -666,7 +772,29 @@
         <p>跟著小偵探一起訓練大腦，找出神秘程式的密碼吧！</p>
     </header>
 
-    <div class="container">
+    <!-- SCREEN 1: MODE SELECTION SCREEN -->
+    <div class="screen active" id="selection-screen">
+        <div class="mode-container">
+            <!-- 3 Digit Card -->
+            <div class="mode-card mode-3" onclick="selectGameMode(3)">
+                <div class="mode-icon">🦉</div>
+                <h3>3 位數邏輯特訓</h3>
+                <span class="mode-badge">數字 1-9 (較簡單)</span>
+                <p>共有 504 種排列組合。不包含數字 0，非常適合邏輯訓練入門的初學者與小偵探！</p>
+            </div>
+            
+            <!-- 4 Digit Card -->
+            <div class="mode-card mode-4" onclick="selectGameMode(4)">
+                <div class="mode-icon">🕵️‍♂️</div>
+                <h3>4 位數標準探險</h3>
+                <span class="mode-badge">數字 0-9 (標準)</span>
+                <p>共有 5040 種排列組合。包含數字 0，經典標準難度，考驗全面推理與邏輯矛盾的拆解！</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: GAME SCREEN -->
+    <div class="screen" id="game-screen">
         <!-- LEFT COLUMN: Main Game Console -->
         <div class="card">
             <div class="card-title">
@@ -674,24 +802,24 @@
             </div>
             
             <div class="actions">
+                <button class="btn btn-secondary" id="btn-back">
+                    <span>⬅️ 換模式</span>
+                </button>
                 <button class="btn btn-secondary" id="btn-new-game">
-                    <span>🔄 重開新遊戲</span>
+                    <span>🔄 重開新局</span>
                 </button>
                 <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted);" id="difficulty-indicator">
-                    題目：4位不重複數字
+                    模式：4 位數
                 </div>
             </div>
 
             <div class="guess-input-container">
-                <!-- Visual Digit Display -->
-                <div class="digit-inputs">
-                    <div class="digit-box" data-index="0"></div>
-                    <div class="digit-box" data-index="1"></div>
-                    <div class="digit-box" data-index="2"></div>
-                    <div class="digit-box" data-index="3"></div>
+                <!-- Visual Digit Display (Rendered dynamically) -->
+                <div class="digit-inputs" id="digit-inputs-container">
+                    <!-- Boxes generated dynamically in JS -->
                 </div>
 
-                <!-- Hidden actual text input for keyboard entry -->
+                <!-- Hidden actual text input -->
                 <input type="text" id="hidden-input" maxlength="4" autocomplete="off" inputmode="numeric">
 
                 <!-- Interactive Keypad -->
@@ -716,8 +844,7 @@
             <div class="detective-panel info" id="detective-panel">
                 <div class="detective-avatar" id="detective-avatar">🦉</div>
                 <div class="detective-bubble" id="detective-bubble">
-                    你好，我是你的邏輯助手小貓頭鷹！
-                    在鍵盤輸入或點選 4 個不同的數字，我會在送出前幫你檢查是否符合之前的線索喔！
+                    正在下載線索中...
                 </div>
             </div>
         </div>
@@ -740,29 +867,14 @@
                     </div>
                 </div>
 
-                <!-- Locks (Position locks deduced) -->
-                <div class="locks-container">
-                    <div class="lock-slot">
-                        <span class="lock-slot-label">第1位</span>
-                        <span class="lock-slot-val" id="lock-0">?</span>
-                    </div>
-                    <div class="lock-slot">
-                        <span class="lock-slot-label">第2位</span>
-                        <span class="lock-slot-val" id="lock-1">?</span>
-                    </div>
-                    <div class="lock-slot">
-                        <span class="lock-slot-label">第3位</span>
-                        <span class="lock-slot-val" id="lock-2">?</span>
-                    </div>
-                    <div class="lock-slot">
-                        <span class="lock-slot-label">第4位</span>
-                        <span class="lock-slot-val" id="lock-3">?</span>
-                    </div>
+                <!-- Locks (Position locks deduced, Rendered dynamically) -->
+                <div class="locks-container" id="locks-container">
+                    <!-- Lock slots generated dynamically -->
                 </div>
 
-                <!-- Elimination Board 0-9 -->
+                <!-- Elimination Board (Rendered dynamically) -->
                 <div class="digits-grid" id="digits-board">
-                    <!-- Javascript will render 0-9 badges here -->
+                    <!-- Badges rendered in JS -->
                 </div>
             </div>
 
@@ -796,16 +908,21 @@
     <button class="audio-toggle" id="audio-toggle" title="切換音效">🔊</button>
 
     <script>
+        // Game Configuration
+        let selectedDigits = 4;
+        let selectedPool = "0123456789";
+        
         // Game State Variables
         let currentGuess = "";
         let gameActive = false;
         let audioEnabled = true;
 
         // Elements
-        const digitBoxes = document.querySelectorAll(".digit-box");
+        let digitBoxes = [];
         const hiddenInput = document.getElementById("hidden-input");
         const btnSubmit = document.getElementById("btn-submit");
         const btnNewGame = document.getElementById("btn-new-game");
+        const btnBack = document.getElementById("btn-back");
         const detectivePanel = document.getElementById("detective-panel");
         const detectiveAvatar = document.getElementById("detective-avatar");
         const detectiveBubble = document.getElementById("detective-bubble");
@@ -820,89 +937,71 @@
         const btnWinRestart = document.getElementById("btn-win-restart");
         const audioToggle = document.getElementById("audio-toggle");
 
-        // Synthesize Sound Effects using Web Audio API
+        // Synthesize Sound Effects
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(type) {
             if (!audioEnabled) return;
             try {
-                // Resume audio context if suspended (browser security)
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume();
                 }
-                
                 const now = audioCtx.currentTime;
                 
                 if (type === 'click') {
-                    // Quick bubble pop sound
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(400, now);
                     osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
-                    
                     gain.gain.setValueAtTime(0.15, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                    
                     osc.start(now);
                     osc.stop(now + 0.1);
                 } 
                 else if (type === 'success') {
-                    // Bright, rising two-tone chime
                     const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
                     notes.forEach((freq, idx) => {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
                         osc.connect(gain);
                         gain.connect(audioCtx.destination);
-                        
                         osc.type = 'triangle';
                         osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-                        
                         gain.gain.setValueAtTime(0, now + idx * 0.08);
                         gain.gain.linearRampToValueAtTime(0.15, now + idx * 0.08 + 0.02);
                         gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.3);
-                        
                         osc.start(now + idx * 0.08);
                         osc.stop(now + idx * 0.08 + 0.3);
                     });
                 } 
                 else if (type === 'warning') {
-                    // Low warning sound (buzz)
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(120, now);
                     osc.frequency.linearRampToValueAtTime(90, now + 0.25);
-                    
                     gain.gain.setValueAtTime(0.15, now);
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    
                     osc.start(now);
                     osc.stop(now + 0.25);
                 } 
                 else if (type === 'win') {
-                    // Happy synth melody arpeggio
-                    const winNotes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50]; // C4, E4, G4, C5, E5, G5, C6
+                    const winNotes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
                     winNotes.forEach((freq, idx) => {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
                         osc.connect(gain);
                         gain.connect(audioCtx.destination);
-                        
                         osc.type = 'sine';
                         osc.frequency.setValueAtTime(freq, now + idx * 0.09);
-                        
                         gain.gain.setValueAtTime(0, now + idx * 0.09);
                         gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.09 + 0.03);
                         gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.09 + 0.4);
-                        
                         osc.start(now + idx * 0.09);
                         osc.stop(now + idx * 0.09 + 0.4);
                     });
@@ -912,18 +1011,93 @@
             }
         }
 
-        // Initialize Board Digit UI Elements
+        // Mode selection screen trigger
+        function selectGameMode(digits) {
+            selectedDigits = digits;
+            selectedPool = (digits === 3) ? "123456789" : "0123456789";
+            
+            // Toggle screen displays
+            document.getElementById("selection-screen").classList.remove("active");
+            document.getElementById("game-screen").classList.add("active");
+            
+            // Render UI containers dynamically
+            renderInputBoxesContainer();
+            renderLockSlotsContainer();
+            renderDigitsBoard();
+            configureKeypad();
+            
+            // Adjust input max length
+            hiddenInput.setAttribute("maxlength", selectedDigits);
+            
+            // Start the actual game session on the server
+            startNewGame();
+        }
+
+        function goBackToSelection() {
+            gameActive = false;
+            document.getElementById("game-screen").classList.remove("active");
+            document.getElementById("selection-screen").classList.add("active");
+            playSound('click');
+        }
+
+        // Render input boxes
+        function renderInputBoxesContainer() {
+            const container = document.getElementById("digit-inputs-container");
+            container.innerHTML = "";
+            for (let i = 0; i < selectedDigits; i++) {
+                const box = document.createElement("div");
+                box.className = "digit-box";
+                box.setAttribute("data-index", i);
+                container.appendChild(box);
+            }
+            digitBoxes = document.querySelectorAll(".digit-box");
+            
+            // Re-bind click listener to focus hidden input
+            digitBoxes.forEach(box => {
+                box.addEventListener("click", () => hiddenInput.focus());
+            });
+        }
+
+        // Render lock slots
+        function renderLockSlotsContainer() {
+            const container = document.getElementById("locks-container");
+            container.innerHTML = "";
+            for (let i = 0; i < selectedDigits; i++) {
+                const slot = document.createElement("div");
+                slot.className = "lock-slot";
+                slot.innerHTML = `
+                    <span class="lock-slot-label">第${i+1}位</span>
+                    <span class="lock-slot-val" id="lock-${i}">?</span>
+                `;
+                container.appendChild(slot);
+            }
+        }
+
+        // Initialize Board Digit Badges based on active pool
         function renderDigitsBoard() {
             digitsBoard.innerHTML = "";
-            for (let i = 0; i <= 9; i++) {
+            const poolArray = Array.from(selectedPool);
+            poolArray.forEach(d => {
                 const badge = document.createElement("div");
                 badge.className = "digit-badge possible";
-                badge.id = `digit-${i}`;
+                badge.id = `digit-${d}`;
                 badge.innerHTML = `
-                    <span>${i}</span>
+                    <span>${d}</span>
                     <span class="digit-badge-label">未知</span>
                 `;
                 digitsBoard.appendChild(badge);
+            });
+        }
+
+        // Configure keypad display
+        function configureKeypad() {
+            const zeroKey = document.querySelector('.num-key[data-val="0"]');
+            if (zeroKey) {
+                if (selectedPool.includes("0")) {
+                    zeroKey.style.display = "flex";
+                } else {
+                    zeroKey.style.display = "none";
+                }
             }
         }
 
@@ -933,29 +1107,36 @@
             const probs = deduction.digit_probabilities || {};
             const locks = deduction.position_locks;
             const remaining = deduction.remaining_count;
+            
+            const maxPermutations = (selectedDigits === 3) ? 504 : 5040;
 
             // 1. Update Remaining Possibilities Gauge
-            remainingCountSpan.innerText = `${remaining.toLocaleString()} / 5,040`;
-            const percentage = (remaining / 5040) * 100;
+            remainingCountSpan.innerText = `${remaining.toLocaleString()} / ${maxPermutations.toLocaleString()}`;
+            const percentage = (remaining / maxPermutations) * 100;
             gaugeBar.style.width = `${percentage}%`;
 
-            // 2. Update 0-9 badging states and show probabilities
-            for (let i = 0; i <= 9; i++) {
-                const badge = document.getElementById(`digit-${i}`);
-                if (!badge) continue;
+            // 2. Update badging states and show probabilities
+            const poolArray = Array.from(selectedPool);
+            poolArray.forEach(d => {
+                const badge = document.getElementById(`digit-${d}`);
+                if (!badge) return;
 
-                const state = states[i.toString()];
-                const prob = probs[i.toString()] !== undefined ? probs[i.toString()] : 50;
-                badge.className = "digit-badge " + state;
+                const state = states[d];
+                const prob = probs[d] !== undefined ? probs[d] : 50;
+                badge.className = "digit-badge " + (state || "possible");
                 
                 const labelEl = badge.querySelector(".digit-badge-label");
-                labelEl.innerText = `${prob}%`;
-            }
+                if (labelEl) {
+                    labelEl.innerText = `${prob}%`;
+                }
+            });
 
             // 3. Update Position Lock display
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < selectedDigits; i++) {
                 const lockSlot = document.getElementById(`lock-${i}`);
-                if (locks[i] !== null) {
+                if (!lockSlot) continue;
+                
+                if (locks[i] !== null && locks[i] !== undefined) {
                     lockSlot.innerText = locks[i];
                     lockSlot.className = "lock-slot-val locked";
                 } else {
@@ -969,7 +1150,6 @@
         async function analyzeCurrentInput() {
             if (!gameActive) return;
 
-            // Call endpoint to check this guess
             try {
                 const res = await fetch("/api/analyze", {
                     method: "POST",
@@ -977,10 +1157,9 @@
                     body: JSON.stringify({ guess: currentGuess })
                 });
                 const data = await res.json();
-                
                 const analysis = data.analysis;
                 
-                // Update UI based on analysis status
+                // Update UI classes
                 let panelClass = "info";
                 if (analysis.status === "valid") panelClass = "valid";
                 else if (analysis.status === "warning" || analysis.status === "error") panelClass = "contradictory";
@@ -1001,7 +1180,7 @@
                     detectiveAvatar.innerText = "🦊";
                     detectiveBubble.innerHTML = analysis.reason;
                     btnSubmit.disabled = false;
-                    if (currentGuess.length === 4) {
+                    if (currentGuess.length === selectedDigits) {
                         playSound('warning');
                     }
                 }
@@ -1018,7 +1197,7 @@
 
         // Submit guess to the backend
         async function submitGuess() {
-            if (!gameActive || currentGuess.length !== 4) return;
+            if (!gameActive || currentGuess.length !== selectedDigits) return;
             
             try {
                 const res = await fetch("/api/submit", {
@@ -1047,7 +1226,6 @@
                     playSound('win');
                 } else {
                     playSound('success');
-                    // Reset input
                     currentGuess = "";
                     updateInputBoxes();
                     analyzeCurrentInput();
@@ -1072,34 +1250,39 @@
                 </div>
             `;
             
-            // Append to top or bottom? Standard is showing chronologically, scroll to bottom
             historyList.appendChild(div);
             historyList.scrollTop = historyList.scrollHeight;
         }
 
-        // Start a fresh game
+        // Start a fresh game session
         async function startNewGame() {
             try {
-                const res = await fetch("/api/start", { method: "POST" });
+                const res = await fetch("/api/start", { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ digits: selectedDigits })
+                });
                 const data = await res.json();
                 
-                // Initialize game parameters
+                // Initialize parameters
                 currentGuess = "";
                 gameActive = true;
                 winOverlay.classList.remove("active");
                 
-                // Reset UI
+                // Reset UI elements
                 historyList.innerHTML = "";
                 historyList.appendChild(historyEmpty);
                 historyEmpty.style.display = "block";
                 
+                // Difficulty display label
+                document.getElementById("difficulty-indicator").innerText = `模式：${selectedDigits} 位數 (數字 ${selectedDigits === 3 ? '1-9' : '0-9'})`;
+                
                 updateInputBoxes();
-                renderDigitsBoard();
                 updateDeductionUI(data.deduction);
                 
                 detectivePanel.className = "detective-panel info";
                 detectiveAvatar.innerText = "🦉";
-                detectiveBubble.innerHTML = "遊戲開始囉！請點擊鍵盤或打字，輸入 4 個不重複的數字來猜測密碼。";
+                detectiveBubble.innerHTML = `遊戲開始囉！神秘的 ${selectedDigits} 位數已鎖定。\n請輸入 ${selectedDigits} 個不重複的數字來猜測密碼。`;
                 btnSubmit.disabled = true;
                 
                 hiddenInput.value = "";
@@ -1111,7 +1294,7 @@
             }
         }
 
-        // Visual updates for input display boxes
+        // Visual updates for input boxes
         function updateInputBoxes() {
             digitBoxes.forEach((box, idx) => {
                 const val = currentGuess[idx];
@@ -1131,9 +1314,17 @@
             });
         }
 
-        // Handle numeric input actions (adds digit, deletes digit)
+        // Handle inputs
         function appendDigit(digit) {
-            if (currentGuess.length >= 4) return;
+            if (currentGuess.length >= selectedDigits) return;
+            
+            // Guard: digit must be in the active pool
+            if (!selectedPool.includes(digit)) {
+                playSound('warning');
+                return;
+            }
+            
+            // Guard: no duplicate digits
             if (currentGuess.includes(digit)) {
                 playSound('warning');
                 return;
@@ -1161,11 +1352,9 @@
             analyzeCurrentInput();
         }
 
-        // Keyboard Handler Listener
+        // Keyboard Listener
         document.addEventListener("keydown", (e) => {
             if (!gameActive) return;
-            
-            // Ignore keystrokes when focused on modal or if game overlay is active
             if (winOverlay.classList.contains("active")) return;
             
             const key = e.key;
@@ -1176,13 +1365,13 @@
             } else if (key === 'Escape') {
                 clearInput();
             } else if (key === 'Enter') {
-                if (currentGuess.length === 4 && !btnSubmit.disabled) {
+                if (currentGuess.length === selectedDigits && !btnSubmit.disabled) {
                     submitGuess();
                 }
             }
         });
 
-        // Setup Keypad click events
+        // Keypad buttons
         document.querySelectorAll(".num-key").forEach(button => {
             button.addEventListener("click", () => {
                 const val = button.getAttribute("data-val");
@@ -1195,23 +1384,16 @@
         btnSubmit.addEventListener("click", submitGuess);
         btnNewGame.addEventListener("click", startNewGame);
         btnWinRestart.addEventListener("click", startNewGame);
+        btnBack.addEventListener("click", goBackToSelection);
 
-        // Keep focus on hidden input to allow desktop/mobile keyboards easily
         document.querySelector(".guess-input-container").addEventListener("click", () => {
             hiddenInput.focus();
         });
 
-        // Audio controls toggle
         audioToggle.addEventListener("click", () => {
             audioEnabled = !audioEnabled;
             audioToggle.innerText = audioEnabled ? "🔊" : "🔇";
             audioToggle.style.borderColor = audioEnabled ? "#dfe6e9" : "#e17055";
-        });
-
-        // Initialize App on load
-        window.addEventListener("load", () => {
-            renderDigitsBoard();
-            startNewGame();
         });
     </script>
 </body>

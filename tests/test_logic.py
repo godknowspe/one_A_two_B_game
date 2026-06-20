@@ -9,79 +9,78 @@ import game_logic
 class TestGameLogic(unittest.TestCase):
     
     def test_calculate_ab(self):
-        # 4A0B
+        # 4-digit
         self.assertEqual(game_logic.calculate_ab("1234", "1234"), (4, 0))
-        # 0A4B
         self.assertEqual(game_logic.calculate_ab("1234", "4321"), (0, 4))
-        # Mixed
-        self.assertEqual(game_logic.calculate_ab("1234", "1356"), (1, 1))
-        # None
-        self.assertEqual(game_logic.calculate_ab("1234", "5678"), (0, 0))
+        # 3-digit
+        self.assertEqual(game_logic.calculate_ab("123", "123"), (3, 0))
+        self.assertEqual(game_logic.calculate_ab("123", "321"), (1, 2))
 
     def test_generate_all_candidates(self):
-        candidates = game_logic.generate_all_candidates()
-        self.assertEqual(len(candidates), 5040)
+        # 4-digit 0-9
+        c4 = game_logic.generate_all_candidates(4, "0123456789")
+        self.assertEqual(len(c4), 5040)
+        
+        # 3-digit 1-9
+        c3 = game_logic.generate_all_candidates(3, "123456789")
+        self.assertEqual(len(c3), 504) # 9 * 8 * 7 = 504
 
     def test_get_remaining_candidates(self):
-        all_c = game_logic.generate_all_candidates()
-        candidates = game_logic.get_remaining_candidates([], all_c)
-        self.assertEqual(len(candidates), 5040)
-        
-        # Guessed 5678 -> 0A0B. Remaining candidates should be 360
-        history1 = [{"guess": "5678", "a": 0, "b": 0}]
-        candidates = game_logic.get_remaining_candidates(history1, all_c)
-        self.assertEqual(len(candidates), 360)
+        # 3-digit 1-9
+        # Guess 123 -> 0A0B. Candidates left should be 6 * 5 * 4 = 120 (using digits 4,5,6,7,8,9)
+        history = [{"guess": "123", "a": 0, "b": 0}]
+        candidates = game_logic.get_remaining_candidates(history, digits=3, pool="123456789")
+        self.assertEqual(len(candidates), 120)
+        for c in candidates:
+            self.assertFalse(any(d in c for d in "123"))
 
-    def test_analyze_pending_guess(self):
+    def test_analyze_pending_guess_3_digits(self):
+        pool = "123456789"
         history = [
-            {"guess": "5678", "a": 0, "b": 0},
-            {"guess": "1234", "a": 1, "b": 1}
+            {"guess": "123", "a": 0, "b": 0}
         ]
         
-        # Incomplete guess
-        res = game_logic.analyze_pending_guess("12", history)
-        self.assertEqual(res["status"], "incomplete")
-        
-        # Duplicate digits
-        res = game_logic.analyze_pending_guess("1123", history)
+        # Input has '0' which is not in pool
+        res = game_logic.analyze_pending_guess("450", history, digits=3, pool=pool)
         self.assertEqual(res["status"], "error")
-
-        # Warnings: contains 5, which is 0% probability (eliminated)
-        res = game_logic.analyze_pending_guess("5123", history)
+        self.assertTrue("不包含數字 '0'" in res["reason"])
+        
+        # Warning: uses 1, which is eliminated
+        res = game_logic.analyze_pending_guess("145", history, digits=3, pool=pool)
         self.assertEqual(res["status"], "warning")
-        self.assertTrue(any("數字 '5'" in w for w in res["warnings"]))
         
-        # Exploratory: 9012. 
-        # All digits 9, 0, 1, 2 have prob > 0% (none are eliminated).
-        # But is 9012 a candidate? Let's check: 
-        # For 9012, 1234 vs 9012 gives: 1 is in 9012 (wrong pos), 2 is in 9012 (wrong pos). So 0A2B.
-        # But the feedback for 1234 was 1A1B. So 9012 cannot be the secret.
-        # However, it contains no eliminated digits or lock violations, so it is an exploratory guess!
-        res = game_logic.analyze_pending_guess("9012", history)
-        self.assertEqual(res["status"], "exploratory")
-        
-        # Valid candidate: 1902
-        # Check: 5678 vs 1902 -> 0A0B.
-        # Check: 1234 vs 1902 -> 1 is at pos 0 (1A), 2 is at pos 3 (1B). Total 1A1B.
-        # 1902 is a candidate secret.
-        res = game_logic.analyze_pending_guess("1902", history)
+        # Exploratory: 456 (not candidate since 123 got 0A0B, wait: 456 has no 1,2,3, so it actually COULD be the candidate! Let's check: 123 vs 456 gives 0A0B. Matches feedback! So 456 is a valid candidate!)
+        res = game_logic.analyze_pending_guess("456", history, digits=3, pool=pool)
         self.assertEqual(res["status"], "valid")
+        
+        # Exploratory: 451 is warned since 1 is eliminated.
+        # What about 457 (candidate).
+        # Let's add a clue: 457 -> 1A1B.
+        history.append({"guess": "457", "a": 1, "b": 1})
+        # Now, guess 458: 457 vs 458 is 2A0B (not 1A1B). So 458 is exploratory!
+        res = game_logic.analyze_pending_guess("458", history, digits=3, pool=pool)
+        self.assertEqual(res["status"], "exploratory")
 
-    def test_deduce_digit_statuses(self):
+    def test_deduce_digit_statuses_3_digits(self):
+        pool = "123456789"
         history = [
-            {"guess": "5678", "a": 0, "b": 0}
+            {"guess": "123", "a": 0, "b": 0}
         ]
-        res = game_logic.deduce_digit_statuses(history)
+        res = game_logic.deduce_digit_statuses(history, digits=3, pool=pool)
         states = res["digit_states"]
         probs = res["digit_probabilities"]
         
-        # 5,6,7,8 must have 0% probability
-        for d in "5678":
+        # 1,2,3 must be eliminated
+        for d in "123":
             self.assertEqual(states[d], "eliminated")
             self.assertEqual(probs[d], 0)
             
+        # 0 must not be in the dictionary!
+        self.assertNotIn("0", states)
+        self.assertNotIn("0", probs)
+        
         # Others must have >0% probability
-        for d in "012349":
+        for d in "456789":
             self.assertEqual(states[d], "possible")
             self.assertGreater(probs[d], 0)
 

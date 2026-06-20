@@ -1,10 +1,9 @@
 import itertools
 import random
 
-def generate_all_candidates():
-    """Generate all 5040 possible 4-digit numbers with unique digits."""
-    digits = "0123456789"
-    return ["".join(p) for p in itertools.permutations(digits, 4)]
+def generate_all_candidates(digits=4, pool="0123456789"):
+    """Generate all permutations of specified length from the digit pool."""
+    return ["".join(p) for p in itertools.permutations(pool, digits)]
 
 def calculate_ab(secret, guess):
     """
@@ -12,7 +11,7 @@ def calculate_ab(secret, guess):
     A: correct digit in correct position.
     B: correct digit in incorrect position.
     """
-    if len(secret) != 4 or len(guess) != 4:
+    if len(secret) != len(guess):
         return 0, 0
     
     # Since digits in both secret and guess are unique, we can use sets
@@ -21,13 +20,13 @@ def calculate_ab(secret, guess):
     b_count = common_digits - a_count
     return a_count, b_count
 
-def get_remaining_candidates(history, all_candidates=None):
+def get_remaining_candidates(history, digits=4, pool="0123456789", all_candidates=None):
     """
     Filter the candidate space based on the guess history.
-    history is a list of dicts: [{"guess": "1234", "a": 0, "b": 1}]
+    history is a list of dicts: [{"guess": "123", "a": 0, "b": 1}]
     """
     if all_candidates is None:
-        candidates = generate_all_candidates()
+        candidates = generate_all_candidates(digits, pool)
     else:
         candidates = list(all_candidates)
         
@@ -41,29 +40,32 @@ def get_remaining_candidates(history, all_candidates=None):
         ]
     return candidates
 
-def deduce_digit_statuses(history):
+def deduce_digit_statuses(history, digits=4, pool="0123456789"):
     """
-    Deduce the logic state of each digit (0-9) and position-specific locks based on history.
+    Deduce the logic state of each digit and position-specific locks based on history.
     Also calculates the percentage probability of each digit being in the secret code.
     """
-    all_c = generate_all_candidates()
-    candidates = get_remaining_candidates(history, all_candidates=all_c)
+    all_c = generate_all_candidates(digits, pool)
+    candidates = get_remaining_candidates(history, digits, pool, all_candidates=all_c)
     total = len(candidates)
     
+    # Pool mapping
+    pool_list = list(pool)
+    
     if total == 0:
-        # No candidates left (should only happen if history is self-contradictory)
         return {
-            "digit_states": {str(d): "possible" for d in range(10)},
-            "digit_probabilities": {str(d): 0 for d in range(10)},
-            "position_locks": [None, None, None, None],
+            "digit_states": {str(d): "possible" for d in pool_list},
+            "digit_probabilities": {str(d): 0 for d in pool_list},
+            "position_locks": [None] * digits,
             "remaining_count": 0
         }
         
     # Count occurrences of each digit in remaining candidates
-    digit_counts = {str(d): 0 for d in range(10)}
+    digit_counts = {str(d): 0 for d in pool_list}
     for c in candidates:
         for digit in c:
-            digit_counts[digit] += 1
+            if digit in digit_counts:
+                digit_counts[digit] += 1
             
     # Determine state: confirmed, eliminated, possible and their probabilities
     digit_states = {}
@@ -79,9 +81,9 @@ def deduce_digit_statuses(history):
         else:
             digit_states[d_str] = "possible"    # ⚪
 
-    # Deduce position locks (if a digit is at the same index for all candidates)
-    position_locks = [None, None, None, None]
-    for i in range(4):
+    # Deduce position locks
+    position_locks = [None] * digits
+    for i in range(digits):
         digits_at_i = set(c[i] for c in candidates)
         if len(digits_at_i) == 1:
             position_locks[i] = list(digits_at_i)[0]
@@ -93,27 +95,33 @@ def deduce_digit_statuses(history):
         "remaining_count": total
     }
 
-def analyze_pending_guess(pending_guess, history):
+def analyze_pending_guess(pending_guess, history, digits=4, pool="0123456789"):
     """
-    Analyze a 4-digit guess before it is submitted.
-    Returns a dict with the evaluation results.
-    Allows exploratory guesses (not candidates but logically sound) and warns on logical contradictions.
+    Analyze a guess before it is submitted.
+    Supports generic digits and pools.
     """
     # 1. Basic validation
     if not pending_guess:
-        return {"status": "incomplete", "reason": "請輸入 4 個不同的數字開始分析喔！"}
+        return {"status": "incomplete", "reason": f"請輸入 {digits} 個不同的數字開始分析喔！"}
     
     if not pending_guess.isdigit():
         return {"status": "error", "reason": "輸入必須全部是數字喔！"}
         
-    if len(pending_guess) != 4:
-        return {"status": "incomplete", "reason": f"目前輸入了 {len(pending_guess)} 個數字，還差 {4 - len(pending_guess)} 個！"}
+    if len(pending_guess) != digits:
+        return {"status": "incomplete", "reason": f"目前輸入了 {len(pending_guess)} 個數字，還差 {digits - len(pending_guess)} 個！"}
         
-    if len(set(pending_guess)) != 4:
+    if len(set(pending_guess)) != digits:
         return {"status": "error", "reason": "數字不能重複喔！請檢查看看。"}
+        
+    # Check if any digit is not in the allowed pool
+    invalid_digits = [d for d in pending_guess if d not in pool]
+    if invalid_digits:
+        if "0" in invalid_digits and "0" not in pool:
+            return {"status": "error", "reason": "⚠️ 注意：這個版本不包含數字 '0' 喔！請輸入 1-9 的數字。"}
+        return {"status": "error", "reason": f"⚠️ 輸入包含無效數字：{', '.join(invalid_digits)}"}
 
     # Generate current deduction state
-    deduction = deduce_digit_statuses(history)
+    deduction = deduce_digit_statuses(history, digits, pool)
     digit_states = deduction["digit_states"]
     position_locks = deduction["position_locks"]
     remaining_count = deduction["remaining_count"]
@@ -134,7 +142,6 @@ def analyze_pending_guess(pending_guess, history):
     # Warning C: Repeated guess
     is_repeated = any(entry["guess"] == pending_guess for entry in history)
     if is_repeated:
-        # Find when it was guessed
         past_idx = next(idx + 1 for idx, entry in enumerate(history) if entry["guess"] == pending_guess)
         warnings.append(f"你已經在第 {past_idx} 次猜測過 '{pending_guess}' 囉！")
 
@@ -149,8 +156,8 @@ def analyze_pending_guess(pending_guess, history):
         }
 
     # If no warnings, check if it's a direct candidate or an exploratory guess
-    all_c = generate_all_candidates()
-    current_candidates = get_remaining_candidates(history, all_candidates=all_c)
+    all_c = generate_all_candidates(digits, pool)
+    current_candidates = get_remaining_candidates(history, digits, pool, all_candidates=all_c)
     
     is_candidate = pending_guess in current_candidates
     if is_candidate:
@@ -184,7 +191,7 @@ def analyze_pending_guess(pending_guess, history):
                 break
                 
         reason = (
-            f"💡 聰明的探索！雖然這 4 個數字的機率都不為 0，但 '{pending_guess}' 這個特定排列組合不可能是答案喔。\n"
+            f"💡 聰明的探索！雖然選取的數字機率都不為 0，但 '{pending_guess}' 這個特定排列組合不可能是答案喔。\n"
         )
         if contradicting_clue_index is not None:
             detail = contradiction_detail
@@ -200,8 +207,8 @@ def analyze_pending_guess(pending_guess, history):
             "remaining_count": remaining_count
         }
 
-def generate_random_secret():
-    """Generate a random 4-digit secret code with unique digits."""
-    digits = list("0123456789")
-    random.shuffle(digits)
-    return "".join(digits[:4])
+def generate_random_secret(digits=4, pool="0123456789"):
+    """Generate a random secret code with unique digits of specified length."""
+    digits_list = list(pool)
+    random.shuffle(digits_list)
+    return "".join(digits_list[:digits])

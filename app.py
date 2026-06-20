@@ -30,16 +30,31 @@ def index():
 
 @app.route("/api/start", methods=["POST"])
 def start_game():
-    secret = game_logic.generate_random_secret()
+    data = request.get_json() or {}
+    digits = int(data.get("digits", 4))
+    
+    # Configure pool based on selected digit mode
+    if digits == 3:
+        pool = "123456789" # 1-9 (no 0)
+    else:
+        digits = 4
+        pool = "0123456789" # 0-9
+        
+    secret = game_logic.generate_random_secret(digits=digits, pool=pool)
+    
+    session["digits"] = digits
+    session["pool"] = pool
     session["secret"] = secret
     session["history"] = []
     
-    # Get initial deduction state (all digits possible, count = 5040)
-    deduction = game_logic.deduce_digit_statuses([])
+    # Get initial deduction state
+    deduction = game_logic.deduce_digit_statuses([], digits=digits, pool=pool)
     
     return jsonify({
         "status": "started",
-        "message": "新遊戲開始囉！神秘的 4 位數已經產生了，快來猜猜看吧！",
+        "digits": digits,
+        "pool": pool,
+        "message": f"新遊戲開始囉！神秘的 {digits} 位數已經產生了，快來猜猜看吧！",
         "remaining_count": deduction["remaining_count"],
         "deduction": deduction
     })
@@ -48,10 +63,13 @@ def start_game():
 def analyze_guess():
     data = request.get_json() or {}
     guess = data.get("guess", "").strip()
+    
+    digits = session.get("digits", 4)
+    pool = session.get("pool", "0123456789")
     history = session.get("history", [])
     
-    analysis = game_logic.analyze_pending_guess(guess, history)
-    deduction = game_logic.deduce_digit_statuses(history)
+    analysis = game_logic.analyze_pending_guess(guess, history, digits=digits, pool=pool)
+    deduction = game_logic.deduce_digit_statuses(history, digits=digits, pool=pool)
     
     return jsonify({
         "analysis": analysis,
@@ -64,13 +82,16 @@ def submit_guess():
     guess = data.get("guess", "").strip()
     
     secret = session.get("secret")
+    digits = session.get("digits", 4)
+    pool = session.get("pool", "0123456789")
+    
     if not secret:
-        return jsonify({"status": "error", "reason": "遊戲尚未開始，請點擊「新遊戲」！"}), 400
+        return jsonify({"status": "error", "reason": "遊戲尚未開始，請選擇模式開始遊戲！"}), 400
         
     history = session.get("history", [])
     
     # 1. Validate guess again
-    validation = game_logic.analyze_pending_guess(guess, history)
+    validation = game_logic.analyze_pending_guess(guess, history, digits=digits, pool=pool)
     if validation["status"] in ["error", "incomplete"]:
         return jsonify({"status": "error", "reason": validation["reason"]}), 400
         
@@ -83,9 +104,9 @@ def submit_guess():
     session["history"] = history
     
     # 4. Get new deduction state after submitting
-    deduction = game_logic.deduce_digit_statuses(history)
+    deduction = game_logic.deduce_digit_statuses(history, digits=digits, pool=pool)
     
-    won = (a == 4)
+    won = (a == digits)
     response_data = {
         "status": "submitted",
         "guess": guess,
@@ -109,7 +130,6 @@ def open_browser():
     webbrowser.open(url)
 
 if __name__ == "__main__":
-    # Prevent browser from opening twice when Flask reloader runs
     if not os.environ.get("WERKZEUG_RUN_MAIN"):
         threading.Thread(target=open_browser, daemon=True).start()
         

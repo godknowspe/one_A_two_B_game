@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕵️‍♂️ 1A2B 邏輯小偵探訓練營 🕵️‍♀️</title>
+    <!-- Google Fonts: Fredoka & Noto Sans TC for a friendly, readable look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --secondary: #fd79a8;
+            --success: #00b894;
+            --success-bg: #e6fcf5;
+            --warning: #e17055;
+            --warning-bg: #fff5f5;
+            --info: #0984e3;
+            --info-bg: #edf7ff;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --border-radius: 20px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            margin-top: 10px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glassmorphism Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px dashed rgba(108, 92, 231, 0.15);
+            padding-bottom: 10px;
+        }
+
+        /* Game Actions */
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .btn {
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 700;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #5b4bc4 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary-light);
+        }
+
+        .btn-secondary:hover {
+            background: #f1f0ff;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #dfe6e9;
+            color: #b2bec3;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            border-color: transparent;
+        }
+
+        /* Guess Input Styling */
+        .guess-input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .digit-inputs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .digit-box {
+            width: 60px;
+            height: 70px;
+            border: 3px solid #dfe6e9;
+            border-radius: 15px;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 64px;
+            background: white;
+            color: var(--text-main);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .digit-box.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(108, 92, 231, 0.2);
+            transform: scale(1.05);
+        }
+
+        .digit-box.filled {
+            background: #f1f0ff;
+            border-color: var(--primary-light);
+        }
+
+        /* Hidden standard input for mobile compatibility and accessibility */
+        #hidden-input {
+            position: absolute;
+            opacity: 0;
+            z-index: -1;
+        }
+
+        /* Keypad */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 380px;
+            margin-bottom: 15px;
+        }
+
+        .key {
+            background: white;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
+            height: 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: inherit;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .key:hover:not(:disabled) {
+            border-color: var(--primary-light);
+            background: #f8f7ff;
+            transform: scale(1.05);
+        }
+
+        .key:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .key:disabled {
+            background: #f2f2f2;
+            color: #d1d8e0;
+            border-color: #f2f2f2;
+            cursor: not-allowed;
+        }
+
+        .key-action {
+            grid-column: span 2;
+            font-size: 1.1rem;
+            background: #f1f2f6;
+        }
+
+        /* Detective Speech Panel */
+        .detective-panel {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 18px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            margin-top: 10px;
+            border-left: 6px solid var(--primary);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);
+            min-height: 110px;
+            transition: var(--transition);
+        }
+
+        .detective-panel.valid {
+            border-left-color: var(--success);
+            background-color: var(--success-bg);
+        }
+
+        .detective-panel.contradictory {
+            border-left-color: var(--warning);
+            background-color: var(--warning-bg);
+        }
+
+        .detective-panel.info {
+            border-left-color: var(--info);
+            background-color: var(--info-bg);
+        }
+
+        .detective-avatar {
+            font-size: 2.8rem;
+            animation: bounce 2s infinite ease-in-out;
+            user-select: none;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .detective-bubble {
+            flex: 1;
+            font-size: 1.02rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            font-weight: 500;
+            white-space: pre-line;
+        }
+
+        .detective-bubble .highlight {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Deduction Board */
+        .deduction-board {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .remaining-gauge {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .gauge-text {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .gauge-bar-outer {
+            height: 14px;
+            background: #dfe6e9;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .gauge-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-light) 0%, var(--primary) 100%);
+            width: 100%;
+            border-radius: 10px;
+            transition: width 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .digits-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .digit-badge {
+            height: 52px;
+            border-radius: 15px;
+            background: white;
+            border: 2px solid #dfe6e9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            position: relative;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        /* Digit Badge States */
+        .digit-badge.possible {
+            background: white;
+            border-color: #d1d8e0;
+            color: var(--text-main);
+        }
+
+        .digit-badge.eliminated {
+            background: #ffe5e5;
+            border-color: #ff7675;
+            color: #d63031;
+            text-decoration: line-through;
+        }
+
+        .digit-badge.eliminated::after {
+            content: "❌";
+            font-size: 0.65rem;
+            position: absolute;
+            top: 2px;
+            right: 4px;
+        }
+
+        .digit-badge.confirmed {
+            background: #e6fcf5;
+            border-color: #20bf6b;
+            color: #20bf6b;
+            box-shadow: 0 0 8px rgba(32, 191, 107, 0.25);
+        }
+
+        .digit-badge.confirmed::after {
+            content: "⭐";
+            font-size: 0.7rem;
+            position: absolute;
+            top: 2px;
+            right: 4px;
+        }
+
+        .digit-badge-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: -2px;
+            font-weight: 600;
+        }
+
+        .digit-badge.eliminated .digit-badge-label {
+            color: #ff7675;
+        }
+
+        .digit-badge.confirmed .digit-badge-label {
+            color: #20bf6b;
+        }
+
+        /* Lock display */
+        .locks-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px dashed #d1d8e0;
+        }
+
+        .lock-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .lock-slot-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .lock-slot-val {
+            font-size: 1.4rem;
+            font-weight: 700;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #eceff1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .lock-slot-val.locked {
+            background: #e6fcf5;
+            color: #20bf6b;
+            border: 2px solid #20bf6b;
+        }
+
+        /* History List */
+        .history-list {
+            margin-top: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+        }
+
+        /* Custom Scrollbar */
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .history-list::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.02);
+            border-radius: 10px;
+        }
+        .history-list::-webkit-scrollbar-thumb {
+            background: rgba(108, 92, 231, 0.2);
+            border-radius: 10px;
+        }
+        .history-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(108, 92, 231, 0.4);
+        }
+
+        .history-item {
+            background: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+            animation: slideIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .history-num {
+            font-size: 0.95rem;
+            color: white;
+            background: var(--primary-light);
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .history-guess {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: var(--text-main);
+            margin-left: 10px;
+            flex: 1;
+        }
+
+        .history-result {
+            display: flex;
+            gap: 6px;
+        }
+
+        .badge-ab {
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .badge-a {
+            background-color: var(--success);
+            box-shadow: 0 3px 8px rgba(0, 184, 148, 0.2);
+        }
+
+        .badge-b {
+            background-color: var(--info);
+            box-shadow: 0 3px 8px rgba(9, 132, 227, 0.2);
+        }
+
+        /* Success/Win Overlay */
+        .win-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(108, 92, 231, 0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .win-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .win-card {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            transform: scale(0.8);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .win-overlay.active .win-card {
+            transform: scale(1);
+        }
+
+        .win-emoji {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            animation: bounce 1.5s infinite ease-in-out;
+        }
+
+        .win-title {
+            font-size: 2rem;
+            color: var(--success);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .win-text {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .win-text strong {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        /* Audio Control Button */
+        .audio-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border: 2px solid #dfe6e9;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            z-index: 50;
+        }
+
+        .audio-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-light);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🕵️‍♂️ 1A2B 邏輯小偵探 🕵️‍♀️</h1>
+        <p>跟著小偵探一起訓練大腦，找出神秘程式的密碼吧！</p>
+    </header>
+
+    <div class="container">
+        <!-- LEFT COLUMN: Main Game Console -->
+        <div class="card">
+            <div class="card-title">
+                <span>🎮 偵探控制台</span>
+            </div>
+            
+            <div class="actions">
+                <button class="btn btn-secondary" id="btn-new-game">
+                    <span>🔄 重開新遊戲</span>
+                </button>
+                <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted);" id="difficulty-indicator">
+                    題目：4位不重複數字
+                </div>
+            </div>
+
+            <div class="guess-input-container">
+                <!-- Visual Digit Display -->
+                <div class="digit-inputs">
+                    <div class="digit-box" data-index="0"></div>
+                    <div class="digit-box" data-index="1"></div>
+                    <div class="digit-box" data-index="2"></div>
+                    <div class="digit-box" data-index="3"></div>
+                </div>
+
+                <!-- Hidden actual text input for keyboard entry -->
+                <input type="text" id="hidden-input" maxlength="4" autocomplete="off" inputmode="numeric">
+
+                <!-- Interactive Keypad -->
+                <div class="keypad">
+                    <button class="key num-key" data-val="1">1</button>
+                    <button class="key num-key" data-val="2">2</button>
+                    <button class="key num-key" data-val="3">3</button>
+                    <button class="key num-key" data-val="4">4</button>
+                    <button class="key num-key" data-val="5">5</button>
+                    <button class="key num-key" data-val="6">6</button>
+                    <button class="key num-key" data-val="7">7</button>
+                    <button class="key num-key" data-val="8">8</button>
+                    <button class="key num-key" data-val="9">9</button>
+                    <button class="key num-key" data-val="0">0</button>
+                    <button class="key key-action" id="key-clear">清除</button>
+                    <button class="key key-action" id="key-delete">退格</button>
+                    <button class="key btn-primary" id="btn-submit" style="grid-column: span 5; height: 52px; border-radius: 12px; margin-top: 5px; font-size: 1.2rem;" disabled>送出答案 🕵️‍♂️</button>
+                </div>
+            </div>
+
+            <!-- Detective Bubble Real-time Analysis -->
+            <div class="detective-panel info" id="detective-panel">
+                <div class="detective-avatar" id="detective-avatar">🦉</div>
+                <div class="detective-bubble" id="detective-bubble">
+                    你好，我是你的邏輯助手小貓頭鷹！
+                    在鍵盤輸入或點選 4 個不同的數字，我會在送出前幫你檢查是否符合之前的線索喔！
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Logic Deduction & History -->
+        <div class="card">
+            <div class="card-title">
+                <span>🧠 邏輯推理看板</span>
+            </div>
+
+            <div class="deduction-board">
+                <!-- Possibility reduction gauge -->
+                <div class="remaining-gauge">
+                    <div class="gauge-text">
+                        <span>符合線索的組合數</span>
+                        <span id="remaining-count">5,040 / 5,040</span>
+                    </div>
+                    <div class="gauge-bar-outer">
+                        <div class="gauge-bar-inner" id="gauge-bar"></div>
+                    </div>
+                </div>
+
+                <!-- Locks (Position locks deduced) -->
+                <div class="locks-container">
+                    <div class="lock-slot">
+                        <span class="lock-slot-label">第1位</span>
+                        <span class="lock-slot-val" id="lock-0">?</span>
+                    </div>
+                    <div class="lock-slot">
+                        <span class="lock-slot-label">第2位</span>
+                        <span class="lock-slot-val" id="lock-1">?</span>
+                    </div>
+                    <div class="lock-slot">
+                        <span class="lock-slot-label">第3位</span>
+                        <span class="lock-slot-val" id="lock-2">?</span>
+                    </div>
+                    <div class="lock-slot">
+                        <span class="lock-slot-label">第4位</span>
+                        <span class="lock-slot-val" id="lock-3">?</span>
+                    </div>
+                </div>
+
+                <!-- Elimination Board 0-9 -->
+                <div class="digits-grid" id="digits-board">
+                    <!-- Javascript will render 0-9 badges here -->
+                </div>
+            </div>
+
+            <!-- Historical Clues -->
+            <div class="card-title" style="margin-top: 25px; border-bottom: 2px dashed rgba(108, 92, 231, 0.15); padding-bottom: 10px;">
+                <span>📜 收集到的線索</span>
+            </div>
+            <div class="history-list" id="history-list">
+                <div style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-top: 20px;" id="history-empty">
+                    還沒有線索，快猜一個數字吧！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Modal Popup -->
+    <div class="win-overlay" id="win-overlay">
+        <div class="win-card">
+            <div class="win-emoji">🏆</div>
+            <div class="win-title">太棒了！挑戰成功！</div>
+            <div class="win-text">
+                你成功破解了神秘密碼：<strong id="win-secret-code">----</strong><br>
+                總共花了 <strong id="win-tries">0</strong> 次猜測！<br>
+                你是一位合格的邏輯小偵探囉！🌟
+            </div>
+            <button class="btn btn-primary" id="btn-win-restart" style="width: 100%;">再玩一次 🚀</button>
+        </div>
+    </div>
+
+    <!-- Audio toggle button -->
+    <button class="audio-toggle" id="audio-toggle" title="切換音效">🔊</button>
+
+    <script>
+        // Game State Variables
+        let currentGuess = "";
+        let gameActive = false;
+        let audioEnabled = true;
+
+        // Elements
+        const digitBoxes = document.querySelectorAll(".digit-box");
+        const hiddenInput = document.getElementById("hidden-input");
+        const btnSubmit = document.getElementById("btn-submit");
+        const btnNewGame = document.getElementById("btn-new-game");
+        const detectivePanel = document.getElementById("detective-panel");
+        const detectiveAvatar = document.getElementById("detective-avatar");
+        const detectiveBubble = document.getElementById("detective-bubble");
+        const remainingCountSpan = document.getElementById("remaining-count");
+        const gaugeBar = document.getElementById("gauge-bar");
+        const digitsBoard = document.getElementById("digits-board");
+        const historyList = document.getElementById("history-list");
+        const historyEmpty = document.getElementById("history-empty");
+        const winOverlay = document.getElementById("win-overlay");
+        const winSecretCode = document.getElementById("win-secret-code");
+        const winTries = document.getElementById("win-tries");
+        const btnWinRestart = document.getElementById("btn-win-restart");
+        const audioToggle = document.getElementById("audio-toggle");
+
+        // Synthesize Sound Effects using Web Audio API
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            try {
+                // Resume audio context if suspended (browser security)
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
+                const now = audioCtx.currentTime;
+                
+                if (type === 'click') {
+                    // Quick bubble pop sound
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
+                    
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } 
+                else if (type === 'success') {
+                    // Bright, rising two-tone chime
+                    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        
+                        gain.gain.setValueAtTime(0, now + idx * 0.08);
+                        gain.gain.linearRampToValueAtTime(0.15, now + idx * 0.08 + 0.02);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.3);
+                        
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.3);
+                    });
+                } 
+                else if (type === 'warning') {
+                    // Low warning sound (buzz)
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(120, now);
+                    osc.frequency.linearRampToValueAtTime(90, now + 0.25);
+                    
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } 
+                else if (type === 'win') {
+                    // Happy synth melody arpeggio
+                    const winNotes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50]; // C4, E4, G4, C5, E5, G5, C6
+                    winNotes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+                        
+                        gain.gain.setValueAtTime(0, now + idx * 0.09);
+                        gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.09 + 0.03);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.09 + 0.4);
+                        
+                        osc.start(now + idx * 0.09);
+                        osc.stop(now + idx * 0.09 + 0.4);
+                    });
+                }
+            } catch (e) {
+                console.error("Audio playback error:", e);
+            }
+        }
+
+        // Initialize Board Digit UI Elements
+        function renderDigitsBoard() {
+            digitsBoard.innerHTML = "";
+            for (let i = 0; i <= 9; i++) {
+                const badge = document.createElement("div");
+                badge.className = "digit-badge possible";
+                badge.id = `digit-${i}`;
+                badge.innerHTML = `
+                    <span>${i}</span>
+                    <span class="digit-badge-label">未知</span>
+                `;
+                digitsBoard.appendChild(badge);
+            }
+        }
+
+        // Update Digit UI Status from API response
+        function updateDeductionUI(deduction) {
+            const states = deduction.digit_states;
+            const locks = deduction.position_locks;
+            const remaining = deduction.remaining_count;
+
+            // 1. Update Remaining Possibilities Gauge
+            remainingCountSpan.innerText = `${remaining.toLocaleString()} / 5,040`;
+            const percentage = (remaining / 5040) * 100;
+            gaugeBar.style.width = `${percentage}%`;
+
+            // 2. Update 0-9 badging states
+            for (let i = 0; i <= 9; i++) {
+                const badge = document.getElementById(`digit-${i}`);
+                if (!badge) continue;
+
+                const state = states[i.toString()];
+                badge.className = "digit-badge " + state;
+                
+                const labelEl = badge.querySelector(".digit-badge-label");
+                if (state === "eliminated") {
+                    labelEl.innerText = "排除";
+                } else if (state === "confirmed") {
+                    labelEl.innerText = "包含";
+                } else {
+                    labelEl.innerText = "可能";
+                }
+            }
+
+            // 3. Update Position Lock display
+            for (let i = 0; i < 4; i++) {
+                const lockSlot = document.getElementById(`lock-${i}`);
+                if (locks[i] !== null) {
+                    lockSlot.innerText = locks[i];
+                    lockSlot.className = "lock-slot-val locked";
+                } else {
+                    lockSlot.innerText = "?";
+                    lockSlot.className = "lock-slot-val";
+                }
+            }
+        }
+
+        // Real-time Guess Analyzer
+        async function analyzeCurrentInput() {
+            if (!gameActive) return;
+
+            // Call endpoint to check this guess
+            try {
+                const res = await fetch("/api/analyze", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ guess: currentGuess })
+                });
+                const data = await res.json();
+                
+                const analysis = data.analysis;
+                
+                // Update UI based on analysis status
+                detectivePanel.className = "detective-panel " + (analysis.status === "valid" ? "valid" : (analysis.status === "contradictory" ? "contradictory" : "info"));
+                
+                if (analysis.status === "valid") {
+                    detectiveAvatar.innerText = "🦉";
+                    detectiveBubble.innerHTML = analysis.reason;
+                    btnSubmit.disabled = false;
+                } 
+                else if (analysis.status === "contradictory") {
+                    detectiveAvatar.innerText = "🦊";
+                    detectiveBubble.innerHTML = analysis.reason;
+                    btnSubmit.disabled = true;
+                    // Play subtle alert tone if it's 4 digits and contradictory
+                    if (currentGuess.length === 4) {
+                        playSound('warning');
+                    }
+                } 
+                else {
+                    // Incomplete or simple validation error
+                    detectiveAvatar.innerText = "🦉";
+                    detectiveBubble.innerHTML = analysis.reason;
+                    btnSubmit.disabled = true;
+                }
+            } catch (err) {
+                console.error("Analysis API failed:", err);
+            }
+        }
+
+        // Submit guess to the backend
+        async function submitGuess() {
+            if (!gameActive || currentGuess.length !== 4) return;
+            
+            try {
+                const res = await fetch("/api/submit", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ guess: currentGuess })
+                });
+                const data = await res.json();
+                
+                if (data.status === "error") {
+                    alert(data.reason);
+                    return;
+                }
+
+                // Add clue to history list
+                addHistoryItem(data.history.length, data.guess, data.a, data.b);
+                
+                // Update Deduction Panel
+                updateDeductionUI(data.deduction);
+                
+                if (data.won) {
+                    gameActive = false;
+                    winSecretCode.innerText = data.secret;
+                    winTries.innerText = data.history.length;
+                    winOverlay.classList.add("active");
+                    playSound('win');
+                } else {
+                    playSound('success');
+                    // Reset input
+                    currentGuess = "";
+                    updateInputBoxes();
+                    analyzeCurrentInput();
+                }
+            } catch (err) {
+                console.error("Submission failed:", err);
+            }
+        }
+
+        // Add visual item to history column
+        function addHistoryItem(turn, guess, a, b) {
+            historyEmpty.style.display = "none";
+            
+            const div = document.createElement("div");
+            div.className = "history-item";
+            div.innerHTML = `
+                <div class="history-num">${turn}</div>
+                <div class="history-guess">${guess}</div>
+                <div class="history-result">
+                    <span class="badge-ab badge-a">${a}A</span>
+                    <span class="badge-ab badge-b">${b}B</span>
+                </div>
+            `;
+            
+            // Append to top or bottom? Standard is showing chronologically, scroll to bottom
+            historyList.appendChild(div);
+            historyList.scrollTop = historyList.scrollHeight;
+        }
+
+        // Start a fresh game
+        async function startNewGame() {
+            try {
+                const res = await fetch("/api/start", { method: "POST" });
+                const data = await res.json();
+                
+                // Initialize game parameters
+                currentGuess = "";
+                gameActive = true;
+                winOverlay.classList.remove("active");
+                
+                // Reset UI
+                historyList.innerHTML = "";
+                historyList.appendChild(historyEmpty);
+                historyEmpty.style.display = "block";
+                
+                updateInputBoxes();
+                renderDigitsBoard();
+                updateDeductionUI(data.deduction);
+                
+                detectivePanel.className = "detective-panel info";
+                detectiveAvatar.innerText = "🦉";
+                detectiveBubble.innerHTML = "遊戲開始囉！請點擊鍵盤或打字，輸入 4 個不重複的數字來猜測密碼。";
+                btnSubmit.disabled = true;
+                
+                hiddenInput.value = "";
+                hiddenInput.focus();
+                
+                playSound('success');
+            } catch (err) {
+                console.error("Failed to start game:", err);
+            }
+        }
+
+        // Visual updates for input display boxes
+        function updateInputBoxes() {
+            digitBoxes.forEach((box, idx) => {
+                const val = currentGuess[idx];
+                if (val !== undefined) {
+                    box.innerText = val;
+                    box.classList.add("filled");
+                    box.classList.remove("active");
+                } else {
+                    box.innerText = "";
+                    box.classList.remove("filled");
+                    if (currentGuess.length === idx) {
+                        box.classList.add("active");
+                    } else {
+                        box.classList.remove("active");
+                    }
+                }
+            });
+        }
+
+        // Handle numeric input actions (adds digit, deletes digit)
+        function appendDigit(digit) {
+            if (currentGuess.length >= 4) return;
+            if (currentGuess.includes(digit)) {
+                playSound('warning');
+                return;
+            }
+            
+            playSound('click');
+            currentGuess += digit;
+            updateInputBoxes();
+            analyzeCurrentInput();
+        }
+
+        function removeLastDigit() {
+            if (currentGuess.length === 0) return;
+            playSound('click');
+            currentGuess = currentGuess.slice(0, -1);
+            updateInputBoxes();
+            analyzeCurrentInput();
+        }
+
+        function clearInput() {
+            if (currentGuess.length === 0) return;
+            playSound('click');
+            currentGuess = "";
+            updateInputBoxes();
+            analyzeCurrentInput();
+        }
+
+        // Keyboard Handler Listener
+        document.addEventListener("keydown", (e) => {
+            if (!gameActive) return;
+            
+            // Ignore keystrokes when focused on modal or if game overlay is active
+            if (winOverlay.classList.contains("active")) return;
+            
+            const key = e.key;
+            if (key >= '0' && key <= '9') {
+                appendDigit(key);
+            } else if (key === 'Backspace') {
+                removeLastDigit();
+            } else if (key === 'Escape') {
+                clearInput();
+            } else if (key === 'Enter') {
+                if (currentGuess.length === 4 && !btnSubmit.disabled) {
+                    submitGuess();
+                }
+            }
+        });
+
+        // Setup Keypad click events
+        document.querySelectorAll(".num-key").forEach(button => {
+            button.addEventListener("click", () => {
+                const val = button.getAttribute("data-val");
+                appendDigit(val);
+            });
+        });
+
+        document.getElementById("key-clear").addEventListener("click", clearInput);
+        document.getElementById("key-delete").addEventListener("click", removeLastDigit);
+        btnSubmit.addEventListener("click", submitGuess);
+        btnNewGame.addEventListener("click", startNewGame);
+        btnWinRestart.addEventListener("click", startNewGame);
+
+        // Keep focus on hidden input to allow desktop/mobile keyboards easily
+        document.querySelector(".guess-input-container").addEventListener("click", () => {
+            hiddenInput.focus();
+        });
+
+        // Audio controls toggle
+        audioToggle.addEventListener("click", () => {
+            audioEnabled = !audioEnabled;
+            audioToggle.innerText = audioEnabled ? "🔊" : "🔇";
+            audioToggle.style.borderColor = audioEnabled ? "#dfe6e9" : "#e17055";
+        });
+
+        // Initialize App on load
+        window.addEventListener("load", () => {
+            renderDigitsBoard();
+            startNewGame();
+        });
+    </script>
+</body>
+</html>

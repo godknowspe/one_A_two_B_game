@@ -930,6 +930,7 @@
         // Update Digit UI Status from API response
         function updateDeductionUI(deduction) {
             const states = deduction.digit_states;
+            const probs = deduction.digit_probabilities || {};
             const locks = deduction.position_locks;
             const remaining = deduction.remaining_count;
 
@@ -938,22 +939,17 @@
             const percentage = (remaining / 5040) * 100;
             gaugeBar.style.width = `${percentage}%`;
 
-            // 2. Update 0-9 badging states
+            // 2. Update 0-9 badging states and show probabilities
             for (let i = 0; i <= 9; i++) {
                 const badge = document.getElementById(`digit-${i}`);
                 if (!badge) continue;
 
                 const state = states[i.toString()];
+                const prob = probs[i.toString()] !== undefined ? probs[i.toString()] : 50;
                 badge.className = "digit-badge " + state;
                 
                 const labelEl = badge.querySelector(".digit-badge-label");
-                if (state === "eliminated") {
-                    labelEl.innerText = "排除";
-                } else if (state === "confirmed") {
-                    labelEl.innerText = "包含";
-                } else {
-                    labelEl.innerText = "可能";
-                }
+                labelEl.innerText = `${prob}%`;
             }
 
             // 3. Update Position Lock display
@@ -985,25 +981,33 @@
                 const analysis = data.analysis;
                 
                 // Update UI based on analysis status
-                detectivePanel.className = "detective-panel " + (analysis.status === "valid" ? "valid" : (analysis.status === "contradictory" ? "contradictory" : "info"));
+                let panelClass = "info";
+                if (analysis.status === "valid") panelClass = "valid";
+                else if (analysis.status === "warning" || analysis.status === "error") panelClass = "contradictory";
+                
+                detectivePanel.className = "detective-panel " + panelClass;
                 
                 if (analysis.status === "valid") {
                     detectiveAvatar.innerText = "🦉";
                     detectiveBubble.innerHTML = analysis.reason;
                     btnSubmit.disabled = false;
                 } 
-                else if (analysis.status === "contradictory") {
+                else if (analysis.status === "exploratory") {
+                    detectiveAvatar.innerText = "🦉";
+                    detectiveBubble.innerHTML = analysis.reason;
+                    btnSubmit.disabled = false;
+                }
+                else if (analysis.status === "warning") {
                     detectiveAvatar.innerText = "🦊";
                     detectiveBubble.innerHTML = analysis.reason;
-                    btnSubmit.disabled = true;
-                    // Play subtle alert tone if it's 4 digits and contradictory
+                    btnSubmit.disabled = false;
                     if (currentGuess.length === 4) {
                         playSound('warning');
                     }
-                } 
+                }
                 else {
                     // Incomplete or simple validation error
-                    detectiveAvatar.innerText = "🦉";
+                    detectiveAvatar.innerText = (analysis.status === "error") ? "🦊" : "🦉";
                     detectiveBubble.innerHTML = analysis.reason;
                     btnSubmit.disabled = true;
                 }

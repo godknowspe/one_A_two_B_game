@@ -71,7 +71,7 @@ def submit_guess():
     
     # 1. Validate guess again
     validation = game_logic.analyze_pending_guess(guess, history)
-    if validation["status"] == "error":
+    if validation["status"] in ["error", "incomplete"]:
         return jsonify({"status": "error", "reason": validation["reason"]}), 400
         
     # 2. Calculate score
